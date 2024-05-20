@@ -1,5 +1,5 @@
 # Entities
-Create a C# entity and DTO classes from a SQL Server table or view.
+Create C# entity and DTO classes for a SQL Server table or view.
 
 ## Description
 
