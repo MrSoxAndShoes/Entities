@@ -9,12 +9,12 @@ def initParser() -> argparse.ArgumentParser:
 		description = "Create C# entity and DTO classes from a SQL Server database table or view."
 	)
 
-	parser.add_argument("--server", help = "Name of the SQL Server instance.")
-	parser.add_argument("--database", help = "Name of the database.")
-	parser.add_argument("--username", help = "Username to access the database and table/view.")
-	parser.add_argument("--password", help = "Password to the user login.")
+	parser.add_argument("--server", required = True, help = "Name of the SQL Server instance.")
+	parser.add_argument("--database", required = True, help = "Name of the database.")
+	parser.add_argument("--username", required = True, help = "Username to access the database and table/view.")
+	parser.add_argument("--password", required = True, help = "Password to the user login.")
 	parser.add_argument("--schema", default = "DBO", help = "Schema the table/view is stored in. Default is 'DBO'.")
-	parser.add_argument("--table", help = "The table or view to create from.")
+	parser.add_argument("--table", required = True, help = "The table or view to create from.")
 	parser.add_argument("--entityNamespace", default = "Entities", help = "The C# namespace of the entity object. Default is 'Entities'.")
 	parser.add_argument("--entityFolder", default = os.getcwd(), help = "The folder to write the entity class to. Default is current folder.")
 	parser.add_argument("--dtoNamespace", default = "Dtos", help = "The C# namespace of the entity object. Default is 'Dtos'.")

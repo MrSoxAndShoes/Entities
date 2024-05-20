@@ -51,4 +51,3 @@ python entity.py --server X --database Y --username Z --password P --table T --e
 ## TODO
 
 - Implement parsing of the check constraints.
-- Fix hang with no parameters given.
