@@ -20,7 +20,7 @@ SELECT
 	NULL								IS_ROWGUIDCOL
 FROM SYS.tables T
 INNER JOIN SYS.schemas S ON (T.schema_id = S.schema_id)
-INNER JOIN SYS.extended_properties P ON (
+LEFT OUTER JOIN SYS.extended_properties P ON (
 	T.object_id = P.major_id
 	AND P.minor_id = 0
 	AND P.class = 1
@@ -81,7 +81,7 @@ UNION SELECT
 	NULL								IS_ROWGUIDCOL
 FROM SYS.views T
 INNER JOIN SYS.schemas S ON (T.schema_id = S.schema_id)
-INNER JOIN SYS.extended_properties P ON (
+LEFT OUTER JOIN SYS.extended_properties P ON (
 	T.object_id = P.major_id
 	AND P.minor_id = 0
 	AND P.class = 1

@@ -138,9 +138,13 @@ def createEntity(tableName, schemaName, columns, dtoClassName, namespace = "Enti
 	entity.append(f"namespace {namespace};")
 	entity.append("")
 	entity.append(f"[Table(\"{tableName}\", Schema = \"{schemaName}\")]")
-	entity.append(f"[Description(\"{(columns[0].COMMENT or "")}\")]")
 
-	if columns[0].OBJECT_TYPE == 'VIEW':
+	if columns[0].COLUMN_ID == 0 and columns[0].COMMENT:
+		entity.append(f"[Description(\"{columns[0].COMMENT})\")]")
+	else:
+		entity.append(f"[Description(\"\")]")
+
+	if columns[0].COLUMN_ID == 0 and columns[0].OBJECT_TYPE == 'VIEW':
 		entity.append("[KeyLess]")
 
 	entity.append(f"[ExcludeFromCodeCoverage]")
@@ -154,7 +158,7 @@ def createEntity(tableName, schemaName, columns, dtoClassName, namespace = "Enti
 			continue
 
 		entity.append(f"\t[Column(\"{col.COLUMN_NAME}\", TypeName = \"{col.FULL_DATA_TYPE}\")]")
-		entity.append(f"\t[Description(\"{(col.COMMENT or "")}\")]")
+		entity.append(f"\t[Description(\"{(col.COMMENT or '')}\")]")
 
 		if (col.IS_NULLABLE == "N"):
 			entity.append("\t[Required(ErrorMessage = \"Value for {0} is required.\")]")
@@ -263,7 +267,12 @@ def createDto(className, sourceTable, columns, namespace = "Dtos", sourceSchema 
 	dto.append(f"namespace {namespace};")
 	dto.append("")
 	dto.append(f"[Table(\"{sourceTable}\", Schema = \"{sourceSchema}\")]")
-	dto.append(f"[Description(\"({columns[0].COMMENT} or "")\")]")
+
+	if columns[0].COLUMN_ID == 0 and columns[0].COMMENT:
+		dto.append(f"[Description(\"{columns[0].COMMENT})\")]")
+	else:
+		dto.append(f"[Description(\"\")]")
+
 	dto.append(f"[ExcludeFromCodeCoverage]")
 	dto.append(f"public sealed class {className} : DtoBase")
 	dto.append("{")
@@ -273,7 +282,7 @@ def createDto(className, sourceTable, columns, namespace = "Dtos", sourceSchema 
 			continue
 
 		dto.append(f"\t[Column(\"{col.COLUMN_NAME}\", TypeName = \"{col.FULL_DATA_TYPE}\")]")
-		dto.append(f"\t[Description(\"{(col.COMMENT or "")}\")]")
+		dto.append(f"\t[Description(\"{(col.COMMENT or '')}\")]")
 
 		if (col.IS_NULLABLE == "N"):
 			dto.append("\t[Required(ErrorMessage = \"Value for {0} is required.\")]")
@@ -359,6 +368,10 @@ def main() -> int:
 	with pyodbc.connect(connectionString) as conn:
 		with conn.cursor() as cursor:
 			tableColumns = cursor.execute(sqlQuery).fetchall()
+
+	if len(tableColumns) == 0:
+		print(f"{args.schema}.{args.table} not found in {args.server}\\{args.database}")
+		return -1
 
 	entityFileName = os.path.join(args.entityFolder, f"{args.table}.cs")
 
