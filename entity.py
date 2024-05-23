@@ -36,8 +36,6 @@ def pluralToSingular(pluralName):
 
 # Transform the table name to Pascal case
 def snakeToPascal(snakeName):
-	# snakeName = re.sub(r"^VW_(.+)$|^(.+)_VW$", r"\1_VIEW_RESULT", snakeName)
-	# snakeName = re.sub(r"(.+)E*S$", r"\1", snakeName)
 	return "".join([w.title() for w in snakeName.split("_")])
 
 # Clean up the default value string given by SQL Server
@@ -232,8 +230,10 @@ def createEntity(tableName, schemaName, columns, dtoClassName, namespace = "Enti
 	entity.append(f"\tpublic {dtoClassName} ToDto()")
 	entity.append("\t{")
 	entity.append(f"\t\treturn new {dtoClassName} {{")
+
 	# append member assignments to the toDto method
 	entity += toDto
+
 	entity.append("\t\t};")
 	entity.append("\t}")
 	entity.append("")
