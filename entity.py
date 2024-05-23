@@ -11,6 +11,7 @@ def initParser() -> argparse.ArgumentParser:
 
 	parser.add_argument("--server", required = True, help = "Name of the SQL Server instance.")
 	parser.add_argument("--database", required = True, help = "Name of the database.")
+	parser.add_argument("--trusted", help = "Use a trusted connection instead of username/password combination.")
 	parser.add_argument("--username", required = True, help = "Username to access the database and table/view.")
 	parser.add_argument("--password", required = True, help = "Password to the user login.")
 	parser.add_argument("--schema", default = "DBO", help = "Schema the table/view is stored in. Default is 'DBO'.")
@@ -161,7 +162,7 @@ def createEntity(tableName, schemaName, columns, dtoClassName, namespace = "Enti
 		entity.append(f"\t[Description(\"{(col.COMMENT or '')}\")]")
 
 		if (col.IS_NULLABLE == "N"):
-			entity.append("\t[Required(ErrorMessage = \"Value for {0} is required.\")]")
+			entity.append("\t[Required(AllowEmptyStrings = false)]")
 
 		if col.DEFAULT_VALUE != None:
 			colDefaultValue = cleanDefaultValue(col.DEFAULT_VALUE).upper()
@@ -169,7 +170,7 @@ def createEntity(tableName, schemaName, columns, dtoClassName, namespace = "Enti
 			colDefaultValue = ""
 
 		if int(col.MAX_LENGTH or 0) > 0:
-			entity.append(f"\t[StringLength({col.MAX_LENGTH}, ErrorMessage = \"Maximum string length for {{0}} is {{1}} characters.\")]")
+			entity.append(f"\t[StringLength({col.MAX_LENGTH})]")
 
 		if col.DATA_TYPE in ["CHAR", "NCHAR", "NTEXT", "NVARCHAR", "VARCHAR"]:
 			entity.append(f"\t[Unicode({'true' if col.DATA_TYPE[0] == 'N' else 'false'})]")
@@ -285,7 +286,7 @@ def createDto(className, sourceTable, columns, namespace = "Dtos", sourceSchema 
 		dto.append(f"\t[Description(\"{(col.COMMENT or '')}\")]")
 
 		if (col.IS_NULLABLE == "N"):
-			dto.append("\t[Required(ErrorMessage = \"Value for {0} is required.\")]")
+			dto.append("\t[Required(AllowEmptyStrings = false)]")
 
 		if col.DEFAULT_VALUE != None:
 			colDefaultValue = cleanDefaultValue(col.DEFAULT_VALUE).upper()
@@ -293,7 +294,7 @@ def createDto(className, sourceTable, columns, namespace = "Dtos", sourceSchema 
 			colDefaultValue = ""
 
 		if int(col.MAX_LENGTH or 0) > 0 and colDefaultValue not in ['N', 'Y']:
-			dto.append(f"\t[StringLength({col.MAX_LENGTH}, ErrorMessage = \"Maximum string length for {{0}} is {{1}} characters.\")]")
+			dto.append(f"\t[StringLength({col.MAX_LENGTH})]")
 
 		# TODO: Implement parsing of check constraints
 		if col.CHECK_CONSTRAINTS != None:
@@ -337,7 +338,7 @@ def createDto(className, sourceTable, columns, namespace = "Dtos", sourceSchema 
 
 		dto.append("")
 
-	dto.pop() # remove blank line inserted after last member declaration
+	dto.append("\tpublic override string ToString() => this.ToJson();")
 	dto.append("}")
 	dto.append("")
 
