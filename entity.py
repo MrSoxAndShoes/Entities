@@ -1,6 +1,6 @@
 # python entity.py --server X --database Y --username Z --password P --table T --entityNamespace MyProject.Entities --dtoNamespace MyProject.Dtos --entityFolder Entities --dtoFolder DTOs
 
-import os, sys, re, argparse
+import os, sys, re, argparse, getpass
 import pyodbc
 
 # Construct the script argument parser
@@ -9,11 +9,14 @@ def initParser() -> argparse.ArgumentParser:
 		description = "Create C# entity and DTO classes from a SQL Server database table or view."
 	)
 
+	parser.add_argument("--drivers", action = "store_true", help = "List the ODBC drives available on the system and exit.")
+	parser.add_argument("--provider", default = "ODBC Driver 17 for SQL Server", help = "Name of the ODBC driver to use. Default is 'ODBC Driver 17 for SQL Server'")
 	parser.add_argument("--server", required = True, help = "Name of the SQL Server instance.")
 	parser.add_argument("--database", required = True, help = "Name of the database.")
-	parser.add_argument("--trusted", help = "Use a trusted connection instead of username/password combination.")
-	parser.add_argument("--username", required = True, help = "Username to access the database and table/view.")
-	parser.add_argument("--password", required = True, help = "Password to the user login.")
+	# Encrypt is not supported
+	# parser.add_argument("--encrypted", action = "store_true", help = "Enable an encryted SQL Server connection (ODBC may not support this). Default is False.")
+	parser.add_argument("--username", help = "Username to access the database and table/view. If not used, a trusted connection is assumed.")
+	parser.add_argument("--password", help = "Password to the user login. May be prompted if not passed in.")
 	parser.add_argument("--schema", default = "DBO", help = "Schema the table/view is stored in. Default is 'DBO'.")
 	parser.add_argument("--table", required = True, help = "The table or view to create from.")
 	parser.add_argument("--entityNamespace", default = "Entities", help = "The C# namespace of the entity object. Default is 'Entities'.")
@@ -349,14 +352,34 @@ def main() -> int:
 	parser = initParser()
 	args = parser.parse_args()
 
-	connectionString = ";".join([
-		f"DRIVER={{ODBC Driver 17 for SQL Server}}",
+	if args.drivers:
+		print("\nODBC Drivers Available:\n\t\"" + "\"\n\t\"".join(pyodbc.drivers()) + "\"\n")
+		return -1
+
+	if args.provider is None:
+		args.provider = "ODBC Driver 17 for SQL Server"
+
+	connectionOptions = [
+		f"DRIVER={{{args.provider}}}",
 		f"SERVER={args.server}",
 		f"DATABASE={args.database}",
-		f"UID={args.username}",
-		f"PWD={args.password}"
-		# "Encrypt=False"
-	])
+	]
+
+	# Encrypt is not supported by ODBC
+	# if args.encrypted is not None:
+	# 	connectionOptions.append("Encrypt=False")
+
+	if args.username is not None:
+		if args.password is None:
+			args.password = getpass.getpass()
+
+		connectionOptions.append(f"UID={args.username}")
+		connectionOptions.append(f"PWD={args.password}")
+	else:
+		connectionOptions.append("Trusted_Connection=yes")
+
+	# build the connection string from the options provided
+	connectionString = ";".join(connectionOptions)
 
 	sqlQuery = " ".join([
 		"SELECT * FROM TABLE_PROPERTIES_VW",
