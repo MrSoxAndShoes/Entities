@@ -32,21 +32,23 @@ The script was created using Python 3.9 with the PyODBC package installed.
 ### Usage
 
 ```
-python entity.py --server X --database Y --username Z --password P --table T --entityNamespace MyProject.Entities --dtoNamespace MyProject.Dtos --entityFolder Entities --dtoFolder DTOs
+python entity.py --server X --database Y --table T --entityNamespace MyProject.Entities --dtoNamespace MyProject.Dtos --entityFolder Entities --dtoFolder DTOs --username U --password P
 ```
 
-| Parameter         | Description                                                         | Default          |
-|-------------------|---------------------------------------------------------------------|------------------|
-| --server          | Name of the SQL Server instance.                                    |                  |
-| --database        | Name of the database.                                               |                  |
-| --username        | Username to access the database and table/view.                     |                  |
-| --password        | Password to the user login.                                         |                  |
-| --schema          | Schema the table/view is stored in. Default is 'DBO'.               | _DBO_            |
-| --table           | The table or view to create from.                                   |                  |
-| --entityNamespace | The C# namespace of the entity object. Default is 'Entities'.       | _Entities_       |
-| --entityFolder    | The folder to write the entity class to. Default is current folder. | _Current folder_ |
-| --dtoNamespace    | The C# namespace of the entity object. Default is 'Dtos'.           | _Dtos_           |
-| --dtoFolder       | The folder to write the DTO class to. Default is current folder.    | _Current folder_ |
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| --drivers | List the ODBC drivers available to PyODBC. If given, execution is stopped afterwards. | |
+| --provider | Specify the ODBC driver to use. | _ODBC Driver 17 for SQL Server_ |
+| --server | Name of the SQL Server instance. | |
+| --database | Name of the database. | |
+| --username | Username to access the database and table/view. If not used, a trusted connection is assumed. | |
+| --password | Password to the user login. May be prompted if not passed in. | |
+| --schema | Schema the table/view is stored in. | _DBO_ |
+| --table | The table or view to create from. | |
+| --entityNamespace | The C# namespace of the entity object. | _Entities_ |
+| --entityFolder | The folder to write the entity class to.  | _Current folder_ |
+| --dtoNamespace | The C# namespace of the entity object. | _Dtos_ |
+| --dtoFolder | The folder to write the DTO class to. | _Current folder_ |
 
 ## TODO
 
